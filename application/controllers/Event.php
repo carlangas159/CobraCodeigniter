@@ -7,7 +7,7 @@ class Event  extends CI_Controller {
 	}
 	public function index() {
 
-		$data['events'] = $this->EventModel->index();
+		$data['data'] = $this->EventModel->index();
 		$this->load->view('event_list', $data);
 	}
 
@@ -33,11 +33,18 @@ class Event  extends CI_Controller {
 
 			$this->EventModel->save($data);
 			$data = [];
-			$data['events'] = $this->EventModel->index();
+			$data['data'] = $this->EventModel->index();
 			echo json_encode($data);
 			// $this->load->view('event_list', $data);
 			// redirect('event');
 		}
+	}
+	// @route('event/list')
+	public function list() {
+			$data['data'] = $this->EventModel->index();
+			echo json_encode($data);
+			// $this->load->view('event_list', $data);
+			// redirect('event');
 	}
 	// @route('event/update')
 	public function update() {
@@ -63,7 +70,7 @@ class Event  extends CI_Controller {
 
 			$this->EventModel->update($data);
 			$data = [];
-			$data['events'] = $this->EventModel->index();
+			$data['data'] = $this->EventModel->index();
 			echo json_encode($data);
 			// $this->load->view('event_list', $data);
 			// redirect('event');
@@ -83,7 +90,7 @@ class Event  extends CI_Controller {
 			$id = $this->input->post('id') ;
 			if($id > 0) $this->EventModel->delete($id);
 			$data = [];
-			$data['events'] = $this->EventModel->index();
+			$data['data'] = $this->EventModel->index();
 			echo json_encode($data);
 			// $this->load->view('event_list', $data);
 			// redirect('event');

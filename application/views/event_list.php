@@ -13,6 +13,10 @@
 		integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
 		crossorigin="anonymous"
 	>
+	<link
+		href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css"
+		rel="stylesheet"
+	>
 	<script
 		src="https://code.jquery.com/jquery-3.7.1.min.js"
 		integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
@@ -40,10 +44,11 @@
 >Agregar nuevo evento</a>
 <table
 	id="tablaEventos"
-	class="table table-striped table-bordered"
+	class="table table-striped table-bordered display"
 >
 	<thead>
 	<tr>
+		<th>Id</th>
 		<th>Título</th>
 		<th>Descripción</th>
 		<th>Fecha de inicio</th>
@@ -52,8 +57,11 @@
 	</tr>
 	</thead>
 	<tbody id="bodyT">
-	<?php foreach ($events as $evento): ?>
+	<?php foreach ($data as $evento): ?>
 		<tr>
+			<td>
+				<?php echo $evento->id; ?>
+			</td>
 			<td>
 				<?php echo $evento->title; ?>
 			</td>
@@ -179,6 +187,10 @@
 ></script>
 
 
+<script
+	src="https://cdn.datatables.net/2.0.2/js/dataTables.js"
+
+></script>
 <script>
 	function update(event) {
 		$('#idevent').val(event.id);
@@ -202,28 +214,8 @@
 					id: id,
 				},
 				success: function (response) {
-					var t = JSON.parse(response);
-					var y = "";
-					var r = t.events;
-					for (var i = 0; i < r.length; ++i) {
-						var x = r[i]
-						y += `<tr> <td>${x.title}</td><td>${x.description}</td> <td>${x.start_at}</td> <td>${x.end_at}</td>
-<td>
-<a
-					href="#"
-					class="btn btn-secondary"
-					onclick='update(${JSON.stringify(x)})'
-				>Editar</a>
-				<a
-					href="#"
-					class="btn btn-danger"
-					onclick="erase(${x.id})"
-				>X</a>
-			</td>
-			</tr>`;
 
-					}
-					$('#bodyT').html(y)
+					tbl.ajax.reload();
 				},
 				error: function (error) {
 					alert('Error al eliminar el evento');
@@ -237,8 +229,41 @@
 	var updateUrl = '<?php echo base_url('event/update'); ?>';
 	var workUrl = addUrl;
 
+	var tbl = null;
 	$(document).ready(function () {
+tbl = new DataTable('#tablaEventos', {
+	ajax: 'event/list',
+	columns: [
 
+		{ data: 'id' },
+		{ data: 'title' },
+		{ data: 'description' },
+		{ data: 'start_at' },
+		{ data: 'end_at' },
+		{ data: 'id' },
+	],
+	columnDefs: [
+		{
+			// The `data` parameter refers to the data for the cell (defined by the
+			// `data` option, which defaults to the column being worked with, in
+			// this case `data: 0`.
+			render: (data, type, row) => {
+				var t =`<a
+					href="#"
+					class="btn btn-secondary"
+					onclick='update(${JSON.stringify(row)})'
+				>Editar</a>
+				<a
+					href="#"
+					class="btn btn-danger"
+					onclick="erase(${data})"
+				>X</a>`
+				return t;
+			},
+			targets: 5
+		},
+	]
+});
 		$('#btnAgregarEvento').click(function () {
 			$('#idevent').val(0);
 			$('#titulo').val(null);
@@ -270,27 +295,7 @@
 				success: function (response) {
 					$('#modalAgregarEvento').modal('hide');
 					$('#btnGuardarEvento').prop('disabled', false);
-					var t = JSON.parse(response);
-					var y = "";
-					var r = t.events;
-					for (var i = 0; i < r.length; ++i) {
-						var x = r[i]
-						y += `<tr> <td>${x.title}</td><td>${x.description}</td> <td>${x.start_at}</td> <td>${x.end_at}</td> <td>
-<a
-					href="#"
-					class="btn btn-secondary"
-					onclick='update(${JSON.stringify(x)})'
-				>Editar</a>
-				<a
-					href="#"
-					class="btn btn-danger"
-					onclick="erase(${x.id})"
-				>X</a>
-			</td>
-			</tr></tr>`
-
-					}
-					$('#bodyT').html(y)
+					tbl.ajax.reload();
 				},
 				error: function (error) {
 					alert('Error al guardar el evento');
